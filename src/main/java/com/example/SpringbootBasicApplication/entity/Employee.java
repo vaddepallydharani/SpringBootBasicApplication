@@ -1,9 +1,6 @@
 package com.example.SpringbootBasicApplication.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
@@ -11,32 +8,10 @@ import lombok.Data;
 public class Employee {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name="emp_id")
     private int empId;
+    @Column(name="emp_name")
     private String empName;
+    @Column(name="emp_salary")
     private int empSalary;
-
-
-    public int getEmpId() {
-        return empId;
-    }
-
-    public void setEmpId(int empId) {
-        this.empId = empId;
-    }
-
-    public String getEmpName() {
-        return empName;
-    }
-
-    public void setEmpName(String empName) {
-        this.empName = empName;
-    }
-
-    public int getEmpSalary() {
-        return empSalary;
-    }
-
-    public void setEmpSalary(int empSalary) {
-        this.empSalary = empSalary;
-    }
 }
