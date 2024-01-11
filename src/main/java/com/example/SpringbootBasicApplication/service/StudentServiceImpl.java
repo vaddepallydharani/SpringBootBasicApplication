@@ -7,6 +7,7 @@ import com.example.SpringbootBasicApplication.repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -78,8 +79,6 @@ public class StudentServiceImpl implements StudentService {
     }
 
 
-
-    // String uri=url.concat(String.valueOf(id));
     public Country getCountryByIdInStudent(Integer countryId){
         String url= "http://localhost:8080/country-state/get-by-country-id"+countryId;
         HttpHeaders httpHeaders =new HttpHeaders();
@@ -87,7 +86,7 @@ public class StudentServiceImpl implements StudentService {
         HttpEntity httpEntity=new HttpEntity(httpHeaders);
         RestTemplate restTemplate=new RestTemplate();
         ResponseEntity<Country> response= restTemplate.exchange(url, HttpMethod.GET,httpEntity, Country.class);
-        return response.getBody();
+        return !ObjectUtils.isEmpty(response) ? response.getBody() : null;
     }
 
 }
