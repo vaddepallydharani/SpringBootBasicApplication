@@ -19,8 +19,6 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService{
@@ -50,7 +48,7 @@ public class EmployeeServiceImpl implements EmployeeService{
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.add("empId",empId.toString());
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<AddressAndDOB> httpEntity=new HttpEntity<AddressAndDOB>(addressAndDOB,httpHeaders);
+        HttpEntity<AddressAndDOB> httpEntity=new HttpEntity<>(addressAndDOB,httpHeaders);
         ResponseEntity<EmployeeDetailsResponse> responseEntity= restTemplate.exchange("http://localhost:8080/address", HttpMethod.POST,httpEntity, EmployeeDetailsResponse.class);
         return responseEntity.getBody();
     }
@@ -63,7 +61,7 @@ public class EmployeeServiceImpl implements EmployeeService{
 
         //Get Employee details
         Optional<Employee> employeeOptional =  employeeRepository.findByEmpId(empId);
-        Employee employee = employeeOptional.get();
+        Employee employee = employeeOptional.orElse(null);
 
         //Get list of countries
         List<Country> countries = countriesClient.getCountries();
@@ -74,25 +72,40 @@ public class EmployeeServiceImpl implements EmployeeService{
         }
 
 
+        EmployeeDetailsResponse employeeDetailsResponse = prepareEmployeeDetailsResponse(addressAndDOB, employee, countries);
+
+        return Optional.of(employeeDetailsResponse);
+    }
+
+    private static EmployeeDetailsResponse prepareEmployeeDetailsResponse(AddressAndDOB addressAndDOB, Employee employee, List<Country> countries) {
         EmployeeDetailsResponse employeeDetailsResponse = new EmployeeDetailsResponse();
         employeeDetailsResponse.setEmployee(employee);
         employeeDetailsResponse.setAddressAndDOB(addressAndDOB);
         employeeDetailsResponse.setCountries(countries);
 
-        List<Country> selectedCountries = countries.stream().filter(country -> country.getCountryName().equalsIgnoreCase("India")).collect(Collectors.toList());
+        //addressValidated(countries, employeeDetailsResponse);
+
+        isAddressValidated(countries, employeeDetailsResponse);
+        return employeeDetailsResponse;
+    }
+
+    private static void addressValidated(List<Country> countries, EmployeeDetailsResponse employeeDetailsResponse) {
+        List<Country> selectedCountries = countries.stream().filter(country -> country.getCountryName().equalsIgnoreCase("India")).toList();
 
         selectedCountries.forEach(country -> {
-            List<States> states =  country.getStates().stream().filter(state -> state.getStateName().equalsIgnoreCase("Andhra Pradesh")).collect(Collectors.toList());
+            List<States> states =  country.getStates().stream().filter(state -> state.getStateName().equalsIgnoreCase("Andhra Pradesh")).toList();
 
             states.forEach(st -> {
-                List<Districts> districts =  st.getDistricts().stream().filter(district -> district.getDistrictName().equalsIgnoreCase("Kurnool")).collect(Collectors.toList());
+                List<Districts> districts =  st.getDistricts().stream().filter(district -> district.getDistrictName().equalsIgnoreCase("Kurnool")).toList();
 
                 employeeDetailsResponse.setIsAddressValidated(!CollectionUtils.isEmpty(districts) ? "TRUE" : "FALSE");
 
             });
 
         });
+    }
 
+    private static void isAddressValidated(List<Country> countries, EmployeeDetailsResponse employeeDetailsResponse) {
         if (!CollectionUtils.isEmpty(countries)) {
             countries.forEach(country -> {
                 if (StringUtils.isNotBlank(country.getCountryName()) && country.getCountryName().equalsIgnoreCase("India")) {
@@ -112,27 +125,6 @@ public class EmployeeServiceImpl implements EmployeeService{
                 }
             });
         }
-
-
-       /* for(Country country:countries){
-            if(country.getCountryName().equalsIgnoreCase("India")){
-                for(States state: country.states){
-                    if(state.getStateName().equalsIgnoreCase("Andhra Pradesh")){
-                        for(Districts district: state.districts){
-                            if(district.getDistrictName().equalsIgnoreCase("Kurnool")){
-                                System.out.println("Kurnool is present in AP and AP is in India");
-                                employeeDetailsResponse.setIsAddressValidated("TRUE");
-                            }
-                        }
-                    }
-                }
-            }
-
-        }*/
-
-
-
-        return Optional.of(employeeDetailsResponse);
     }
 
 
@@ -148,7 +140,7 @@ public class EmployeeServiceImpl implements EmployeeService{
 
     @Override
     public Employee get1Emp(Integer empId) {
-        return employeeRepository.findById(empId).get();
+        return employeeRepository.findById(empId).isPresent() ? employeeRepository.findById(empId).get() : null;
     }
 
     @Override

@@ -10,9 +10,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class StudentServiceImpl implements StudentService {
@@ -46,11 +48,15 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public StudentResponse getStudentById(Integer id) {
 
-        Student student = studentRepository.findById(id).get();
+        Optional<Student> optionalStudent = studentRepository.findById(id);
+
+        Student student = optionalStudent.orElse(null);
 
         StudentResponse studentResponse = new StudentResponse();
-        studentResponse.setSno(student.getSno());
-        studentResponse.setSname(student.getSname());
+        if(!ObjectUtils.isEmpty(student)) {
+            studentResponse.setSno(student.getSno());
+            studentResponse.setSname(student.getSname());
+        }
 
         return studentResponse ;
     }
@@ -58,12 +64,17 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public StudentResponse getStudentNameWithYear(Integer id) {
 
-        Student student = studentRepository.findById(id).get();
+        Optional<Student> optionalStudent = studentRepository.findById(id);
+        Student student = optionalStudent.orElse(null);
 
         int currentYear = java.time.LocalDate.now().getYear();
 
         StudentResponse studentResponse = new StudentResponse();
-        studentResponse.setSname(student.getSname() + "_" + currentYear);
+
+        if(!ObjectUtils.isEmpty(student)) {
+            studentResponse.setSname(student.getSname() + "_" + currentYear);
+        }
+
         return studentResponse;
     }
 
@@ -71,7 +82,7 @@ public class StudentServiceImpl implements StudentService {
     public List<Country> getListOfCountries() {
         String url= "http://localhost:8080/country-state/fetch-all/";
         HttpHeaders httpHeaders =new HttpHeaders();
-        httpHeaders.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        httpHeaders.setAccept(List.of(MediaType.APPLICATION_JSON));
         HttpEntity httpEntity=new HttpEntity(httpHeaders);
         RestTemplate restTemplate=new RestTemplate();
        ResponseEntity<List> response= restTemplate.exchange(url, HttpMethod.GET,httpEntity, List.class);
@@ -80,12 +91,16 @@ public class StudentServiceImpl implements StudentService {
 
 
     public Country getCountryByIdInStudent(Integer countryId){
-        String url= "http://localhost:8080/country-state/get-by-country-id"+countryId;
+        String url= "http://localhost:8080/country-state/get-by-country-id";
         HttpHeaders httpHeaders =new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity httpEntity=new HttpEntity(httpHeaders);
+
+        UriComponents builder = UriComponentsBuilder.fromHttpUrl(url)
+                .queryParam("countryId",countryId).build();
+
         RestTemplate restTemplate=new RestTemplate();
-        ResponseEntity<Country> response= restTemplate.exchange(url, HttpMethod.GET,httpEntity, Country.class);
+        ResponseEntity<Country> response= restTemplate.exchange(builder.toString(), HttpMethod.GET,httpEntity, Country.class);
         return !ObjectUtils.isEmpty(response) ? response.getBody() : null;
     }
 

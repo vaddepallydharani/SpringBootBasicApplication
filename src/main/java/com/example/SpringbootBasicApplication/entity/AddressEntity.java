@@ -1,6 +1,7 @@
 package com.example.SpringbootBasicApplication.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Entity
@@ -26,6 +27,7 @@ public class AddressEntity {
     private String country;
 
     @Column(name="zip_code")
+    @NotBlank(message = "zipcode must not be empty")
     private String zipcode;
 
 

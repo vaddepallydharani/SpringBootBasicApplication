@@ -19,7 +19,6 @@ public class AddressServiceImpl implements AddressService {
     }
 
     public AddressEntity saveAddress(AddressEntity addressEntity) {
-        AddressEntity save = addressRepository.save(addressEntity);
-        return save;
+        return addressRepository.save(addressEntity);
     }
 }
