@@ -11,7 +11,7 @@ import java.util.List;
 public interface StudentRepository extends JpaRepository<Student,Integer> {
 
     Student findBySnameAndAvg(String sname, Integer avg);
-    List<Student> findBySname(String sname);
+    List<Student> findBySadd( String sadd);
 
 
 }
