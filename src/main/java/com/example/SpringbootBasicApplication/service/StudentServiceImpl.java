@@ -5,6 +5,7 @@ import com.example.SpringbootBasicApplication.entity.Student;
 import com.example.SpringbootBasicApplication.model.StudentResponse;
 import com.example.SpringbootBasicApplication.repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
@@ -15,6 +16,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class StudentServiceImpl implements StudentService {
@@ -80,13 +82,18 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public List<Country> getListOfCountries() {
-        String url= "http://localhost:8080/country-state/fetch-all/";
-        HttpHeaders httpHeaders =new HttpHeaders();
+        String url= "http://localhost:8080/country-state/fetch-all";
+       /* HttpHeaders httpHeaders =new HttpHeaders();
         httpHeaders.setAccept(List.of(MediaType.APPLICATION_JSON));
-        HttpEntity httpEntity=new HttpEntity(httpHeaders);
+        HttpEntity httpEntity=new HttpEntity(httpHeaders);*/
         RestTemplate restTemplate=new RestTemplate();
-       ResponseEntity<List> response= restTemplate.exchange(url, HttpMethod.GET,httpEntity, List.class);
-        return response.getBody();
+       ResponseEntity<List<Country>> response= restTemplate.exchange(
+               url,
+               HttpMethod.GET,
+               null,
+               new ParameterizedTypeReference<List<Country>>(){});
+       List<Country> list=response.getBody();
+        return list;
     }
 
 
@@ -102,6 +109,24 @@ public class StudentServiceImpl implements StudentService {
         RestTemplate restTemplate=new RestTemplate();
         ResponseEntity<Country> response= restTemplate.exchange(builder.toString(), HttpMethod.GET,httpEntity, Country.class);
         return !ObjectUtils.isEmpty(response) ? response.getBody() : null;
+    }
+
+     public List<Student> findBySAddAsHyd( String sadd){
+         List<Student> studentList=studentRepository.findBySadd(sadd);
+
+        if(!studentList.isEmpty()){
+           /* for(Student student : studentList){
+                student.getSadd().equalsIgnoreCase("hyd");}*/
+
+            studentList = studentList.stream()
+                    .filter(student -> student.getSadd().equalsIgnoreCase("hyd"))
+                    .collect(Collectors.toList());
+
+        }
+
+
+
+        return studentList;
     }
 
 }
