@@ -22,6 +22,8 @@ public interface StudentService {
     public List<Country> getListOfCountries();
     public Country getCountryByIdInStudent(Integer countryId);
 
+    public List<Student> findBySAddAsHyd( String sadd);
+
 
 
 

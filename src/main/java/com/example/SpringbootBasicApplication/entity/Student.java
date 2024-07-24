@@ -17,8 +17,6 @@ public class Student {
     private String sadd;
     private Integer avg;
 
-    public Student(int i, int i1, String thaneesh, String hyd, int i2) {
-    }
 
 
     public Integer getId() {
