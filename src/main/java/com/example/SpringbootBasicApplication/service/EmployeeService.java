@@ -15,7 +15,7 @@ public interface EmployeeService {
 
     public EmployeeDetailsResponse saveEmployeeFullDetails(AddressAndDOB addressAndDOB, Integer empid);
 
-    public Optional<EmployeeDetailsResponse> getEmployee(Integer empid) throws Exception;
+    public Optional<EmployeeDetailsResponse> getEmployee(Integer empId) throws Exception;
 
     public List<Employee> getAllEmployees();
 

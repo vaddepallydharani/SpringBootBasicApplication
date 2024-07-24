@@ -44,13 +44,51 @@ public class EmployeeServiceImpl implements EmployeeService{
     }
 
     @Override
+    public List<Employee> getAllEmployees() {
+        return employeeRepository.findAll();
+    }
+
+    @Override
+    public Employee editEmployee(Employee employee) {
+        return employeeRepository.save(employee);
+    }
+
+    @Override
+    public Employee get1Emp(Integer empId) {
+        return employeeRepository.findById(empId).isPresent() ? employeeRepository.findById(empId).get() : null;
+    }
+
+    @Override
+    public List<Employee> getByEmpName(String empName) {
+
+        return employeeRepository.findByEmpName( empName);
+    }
+
+    @Override
+    public List<Employee> getByEmpSalary(Integer empSalary) {
+
+        return employeeRepository.findByEmpSalary(empSalary);
+    }
+
+    @Override
+    public String deleteEmployee(Integer empId) {
+       employeeRepository.deleteById(empId);
+        return "Deleted successfully";
+    }
+    @Override
     public EmployeeDetailsResponse saveEmployeeFullDetails(AddressAndDOB addressAndDOB, Integer empId) {
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.add("empId",empId.toString());
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<AddressAndDOB> httpEntity=new HttpEntity<>(addressAndDOB,httpHeaders);
         ResponseEntity<EmployeeDetailsResponse> responseEntity= restTemplate.exchange("http://localhost:8080/address", HttpMethod.POST,httpEntity, EmployeeDetailsResponse.class);
+
+        if(ObjectUtils.isEmpty(responseEntity) || !responseEntity.getStatusCode().is2xxSuccessful()){
+            throw new RuntimeException("Not Able to save the employee record");
+        }
+
         return responseEntity.getBody();
+
     }
 
     @Override
@@ -127,39 +165,6 @@ public class EmployeeServiceImpl implements EmployeeService{
         }
     }
 
-
-    @Override
-    public List<Employee> getAllEmployees() {
-        return employeeRepository.findAll();
-    }
-
-    @Override
-    public Employee editEmployee(Employee employee) {
-        return employeeRepository.save(employee);
-    }
-
-    @Override
-    public Employee get1Emp(Integer empId) {
-        return employeeRepository.findById(empId).isPresent() ? employeeRepository.findById(empId).get() : null;
-    }
-
-    @Override
-    public List<Employee> getByEmpName(String empName) {
-
-        return employeeRepository.findByEmpName( empName);
-    }
-
-    @Override
-    public List<Employee> getByEmpSalary(Integer empSalary) {
-
-        return employeeRepository.findByEmpSalary(empSalary);
-    }
-
-    @Override
-    public String deleteEmployee(Integer empId) {
-       employeeRepository.deleteById(empId);
-        return "Deleted successfully";
-    }
 
 
 }
